@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds">
+    <!--
+        scan="true"：开启配置文件热加载，修改后无需重启应用
+        scanPeriod="30 seconds"：每 30 秒检查一次配置变化，避免频繁扫描影响性能
+    -->
+
+    <!-- 日志输出目录 -->
+    <property name="LOG_PATH" value="logs"/>
+    <!-- 主应用日志文件 -->
+    <property name="LOG_FILE" value="${LOG_PATH}/acthub-service.log"/>
+    <!-- SQL 日志文件（单独分离，便于排查数据库问题） -->
+    <property name="SQL_LOG_FILE" value="${LOG_PATH}/acthub-sql.log"/>
+
+    <!--
+        控制台输出 Appender
+        使用自定义的 MaskingPatternLayout 对敏感信息进行脱敏
+    -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.xiaodou.log.extension.logback.MaskingPatternLayout">
+                <!-- 脱敏规则：匹配 password='...' 并替换为 password='***' -->
+                <maskPattern>password\s*=\s*\'(.*?)\'</maskPattern>
+                <!-- 脱敏规则：匹配 avatar_url='...' 并替换为 avatar_url='***' -->
+                <maskPattern>avatar_url\s*=\s*\'(.*?)\'</maskPattern>
+                <!-- 可根据需要添加更多敏感字段，如：phone、id_card、email 等 -->
+                <!-- <maskPattern>phone\s*=\s*\'(.*?)\'</maskPattern> -->
+
+                <!-- 日志输出格式 -->
+                <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [traceId=%X{traceId:-},spanId=%X{spanId:-}] - %msg%n</pattern>
+                <charset>UTF-8</charset>
+            </layout>
+        </encoder>
+    </appender>
+
+    <!--
+        主应用日志文件输出 Appender
+        按天滚动，保留 30 天，单个文件最大 100MB，总日志大小不超过 3GB
+    -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 同时按时间和大小滚动 -->
+            <fileNamePattern>${LOG_PATH}/ai-service.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- 单个文件最大 100MB -->
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 日志总保留 30 天 -->
+            <maxHistory>30</maxHistory>
+            <!-- 归档日志总大小不超过 3GB -->
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [traceId=%X{traceId:-},spanId=%X{spanId:-}] - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!--
+        SQL 日志文件 Appender（专门用于 P6Spy）
+        只记录 SQL 相关日志，便于数据库问题排查
+    -->
+    <appender name="P6SPY_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${SQL_LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/sql.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [traceId=%X{traceId:-},spanId=%X{spanId:-}] - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!--
+        P6Spy 日志处理（关键：实现“只在出错时打印 SQL”）
+        P6Spy 默认使用 SLF4J 输出日志，日志名称为 "p6spy"
+    -->
+    <!-- 开发/测试环境：打印所有 SQL（DEBUG 级别） -->
+    <springProfile name="dev,test">
+        <logger name="p6spy" level="DEBUG" additivity="false">
+            <!-- 开发环境同时输出到控制台和文件 -->
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="P6SPY_FILE"/>
+        </logger>
+    </springProfile>
+
+    <!-- 生产环境：只记录 ERROR 级别的 SQL（即执行失败的 SQL） -->
+    <springProfile name="prod">
+        <logger name="p6spy" level="ERROR" additivity="false">
+            <!-- 生产环境只写入文件，不打印控制台，避免干扰 -->
+            <appender-ref ref="P6SPY_FILE"/>
+        </logger>
+    </springProfile>
+
+    <!--
+        根日志记录器
+        开发环境输出到控制台和文件
+        生产环境只输出到文件（可选）
+    -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>

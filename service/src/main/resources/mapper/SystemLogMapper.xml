@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xiaodou.mapper.SystemLogMapper">
+
+    <resultMap id="SystemLogResultMap" type="com.xiaodou.model.dto.syslog.SystemLogDTO">
+        <id property="id" column="id"/>
+        <result property="operatorUserId" column="operator_user_id"/>
+        <result property="operatorUserName" column="operator_user_name"/>
+        <result property="operatorTenantId" column="operator_tenant_id"/>
+        <result property="operatorTenantName" column="operator_tenant_name"/>
+        <result property="module" column="module"/>
+        <result property="action" column="action"/>
+        <result property="targetType" column="target_type"/>
+        <result property="targetId" column="target_id"/>
+        <result property="description" column="description"/>
+        <result property="detail" column="detail"/>
+        <result property="success" column="success"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="stackTrace" column="stack_trace"/>
+        <result property="tags" column="tags"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="userAgent" column="user_agent"/>
+        <result property="createdAt" column="created_at_millis"/>
+
+        <!-- 新增字段 -->
+        <result property="traceId" column="trace_id"/>
+        <result property="spanId" column="span_id"/>
+        <result property="logLevel" column="log_level"/>
+        <result property="operatorUserType" column="operator_user_type"/>
+        <result property="errorCode" column="error_code"/>
+        <result property="costTimeMs" column="cost_time_ms"/>
+    </resultMap>
+
+    <!-- 分页查询系统日志（包含 stackTrace 和 tags） -->
+    <select id="pageSystemLog" resultMap="SystemLogResultMap">
+        SELECT
+        sl.id,
+        sl.operator_user_id,
+        u.username AS operator_user_name,
+        sl.operator_tenant_id,
+        t.name AS operator_tenant_name,
+        sl.module,
+        sl.action,
+        sl.target_type,
+        sl.target_id,
+        sl.description,
+        sl.detail,
+        sl.success,
+        sl.error_message,
+        sl.stack_trace,        <!-- 新增 -->
+        sl.tags,               <!-- 新增 -->
+        sl.ip_address,
+        sl.user_agent,
+        UNIX_TIMESTAMP(sl.created_at) * 1000 AS created_at_millis,
+
+        sl.trace_id,
+        sl.span_id,
+        sl.log_level,
+        sl.operator_user_type,
+        sl.error_code,
+        sl.cost_time_ms
+
+        FROM system_log sl
+        LEFT JOIN user u ON sl.operator_user_id = u.id
+        LEFT JOIN tenant t ON sl.operator_tenant_id = t.id
+        <where>
+            <if test="query.id != null and query.id != ''">
+                AND sl.id = #{query.id}
+            </if>
+            <if test="query.operatorUserName != null and query.operatorUserName != ''">
+                AND u.username LIKE CONCAT('%', #{query.operatorUserName}, '%')
+            </if>
+            <if test="query.operatorTenantName != null and query.operatorTenantName != ''">
+                AND t.name LIKE CONCAT('%', #{query.operatorTenantName}, '%')
+            </if>
+            <if test="query.operatorTenantId != null and query.operatorTenantId != ''">
+                AND sl.operator_tenant_id = #{query.operatorTenantId}
+            </if>
+            <if test="query.module != null and query.module != ''">
+                AND sl.module LIKE CONCAT('%', #{query.module}, '%')
+            </if>
+            <if test="query.action != null and query.action != ''">
+                AND sl.action LIKE CONCAT('%', #{query.action}, '%')
+            </if>
+            <if test="query.description != null and query.description != ''">
+                AND sl.description LIKE CONCAT('%', #{query.description}, '%')
+            </if>
+            <if test="query.success != null">
+                AND sl.success = #{query.success}
+            </if>
+            <if test="query.errorMessage != null and query.errorMessage != ''">
+                AND sl.error_message LIKE CONCAT('%', #{query.errorMessage}, '%')
+            </if>
+            <if test="query.stackTrace != null and query.stackTrace != ''">
+                AND sl.stack_trace LIKE CONCAT('%', #{query.stackTrace}, '%')
+            </if>
+            <if test="query.tags != null and query.tags != ''">
+                AND sl.tags LIKE CONCAT('%', #{query.tags}, '%')
+            </if>
+            <if test="query.ipAddress != null and query.ipAddress != ''">
+                AND sl.ip_address = #{query.ipAddress}
+            </if>
+            <if test="query.logLevel != null and query.logLevel != ''">
+                AND sl.log_level = #{query.logLevel}
+            </if>
+            <if test="query.operatorUserType != null and query.operatorUserType != ''">
+                AND sl.operator_user_type = #{query.operatorUserType}
+            </if>
+
+            <!-- 时间范围：前端传毫秒时间戳 -->
+            <if test="query.createdAtStart != null">
+                AND sl.created_at >= FROM_UNIXTIME(#{query.createdAtStart} / 1000)
+            </if>
+            <if test="query.createdAtEnd != null">
+                AND sl.created_at &lt;= FROM_UNIXTIME(#{query.createdAtEnd} / 1000)
+            </if>
+        </where>
+        ORDER BY sl.created_at DESC
+    </select>
+
+</mapper>

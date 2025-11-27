@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaodou.mapper.TrackingEventMapper">
+
+    <select id="countDistinctUsersByTimeRange" resultType="java.lang.Integer">
+        SELECT COUNT(DISTINCT user_id)
+        FROM tracking_event
+        <where>
+            <if test="startTime != null">
+                AND created_at >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND created_at &lt;= #{endTime}
+            </if>
+            <if test="tenantId != null and tenantId != ''">
+                AND tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+
+    <select id="countEventsByNameAndTimeRange" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM tracking_event
+        <where>
+            event_name = #{eventName}
+            <if test="startTime != null">
+                AND created_at >= #{startTime}
+            </if>
+            <if test="endTime != null">
+                AND created_at &lt;= #{endTime}
+            </if>
+            <if test="tenantId != null and tenantId != ''">
+                AND tenant_id = #{tenantId}
+            </if>
+        </where>
+    </select>
+
+</mapper>

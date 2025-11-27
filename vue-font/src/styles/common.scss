@@ -1,0 +1,132 @@
+// 页面容器样式
+.page-container {
+  padding: 10px;
+  background-color: var(--app-bg-color);
+  min-height: 100vh;
+}
+
+// 页面标题栏样式
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  h2 {
+    margin: 0;
+    color: #1d2129;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .operation-buttons {
+    display: flex;
+    gap: 10px;
+  }
+  button {
+    background: var(--app-primary-gradient);
+    border-color: var(--el-color-primary);
+    background-size: 200% 200%;
+    transition: background-position 0.3s ease;
+    &:hover {
+      background-position: right center;
+      border-color: var(--el-color-primary);
+    }
+    &:focus {
+      background: var(--app-primary-gradient);
+      border-color: var(--el-color-primary);
+    }
+  }
+}
+
+// 搜索区域样式
+.search-container {
+  margin-bottom: 20px;
+}
+
+// 表格卡片样式
+.table-card {
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s;
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// 空表格样式
+.table-empty {
+  padding: 40px 0;
+  text-align: center;
+}
+
+// 分页容器样式
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+// 表格行样式
+.table-row-even {
+  background-color: #fcfdff;
+}
+
+.table-row-odd {
+  background-color: #fff;
+}
+
+// 操作按钮样式
+.action-buttons {
+  display: flex;
+  // gap: 8px;
+  justify-content: center;
+}
+
+// 创建时间样式
+.created-time {
+  color: #666;
+  font-size: 13px;
+}
+
+// Element UI 表格样式覆盖
+:deep(.el-table) {
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  .el-table__header tr th {
+    background-color: #f7f8fa;
+    color: #4e5969;
+    font-weight: 500;
+    border-bottom: 1px solid #e5e6eb;
+  }
+  .el-table__body tr {
+    transition: background-color 0.2s;
+  }
+}
+
+// Element UI 抽屉样式覆盖
+:deep(.el-drawer) {
+  .el-drawer__header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #e5e6eb;
+    margin-bottom: 16px;
+    h3 {
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+  .page-container {
+    padding: 16px;
+  }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    .operation-buttons {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+  }
+}

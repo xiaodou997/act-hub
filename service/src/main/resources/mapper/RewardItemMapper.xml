@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaodou.mapper.RewardItemMapper">
+
+    <select id="selectPageWithDetails" resultType="com.xiaodou.model.vo.RewardItemVO">
+        SELECT
+            ri.*,
+            r.name AS rewardName,
+            wu.nickname AS targetUserName,
+            u.user_name AS importerName
+        FROM
+            reward_item ri
+        LEFT JOIN
+            reward r ON ri.reward_id = r.id
+        LEFT JOIN
+            wechat_user wu ON ri.target_user_id = wu.id
+        LEFT JOIN
+            user u ON ri.importer_id = u.id
+        <where>
+            <if test="query.rewardId != null and query.rewardId != ''">
+                AND ri.reward_id = #{query.rewardId}
+            </if>
+            <if test="query.itemValue != null and query.itemValue != ''">
+                AND ri.item_value LIKE CONCAT('%', #{query.itemValue}, '%')
+            </if>
+            <if test="query.status != null">
+                AND ri.status = #{query.status}
+            </if>
+            <if test="query.targetUserId != null and query.targetUserId != ''">
+                AND ri.target_user_id = #{query.targetUserId}
+            </if>
+            <if test="query.targetPhoneNumber != null and query.targetPhoneNumber != ''">
+                AND ri.target_phone_number = #{query.targetPhoneNumber}
+            </if>
+        </where>
+        ORDER BY
+            ri.created_at DESC
+    </select>
+
+    <select id="selectAndLockAvailableItems" resultType="com.xiaodou.model.RewardItem">
+        SELECT *
+        FROM reward_item
+        WHERE reward_id = #{rewardId} AND status = 0
+        ORDER BY created_at ASC
+        LIMIT #{limit}
+        FOR UPDATE
+    </select>
+
+    <update id="batchUpdateStatus">
+        UPDATE reward_item
+        SET status = #{status}, updated_at = NOW()
+        WHERE id IN
+        <foreach item="itemId" collection="itemIds" open="(" separator="," close=")">
+            #{itemId}
+        </foreach>
+    </update>
+
+</mapper>

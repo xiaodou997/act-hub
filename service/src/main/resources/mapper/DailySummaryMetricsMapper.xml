@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaodou.mapper.DailySummaryMetricsMapper">
+
+    <insert id="upsert" parameterType="com.xiaodou.model.DailySummaryMetrics">
+        INSERT INTO daily_summary_metrics (metric_date, tenant_id, daily_active_users, task_completions, articles_created, rewards_paid_out)
+        VALUES (#{metricDate}, #{tenantId}, #{dailyActiveUsers}, #{taskCompletions}, #{articlesCreated}, #{rewardsPaidOut})
+        ON DUPLICATE KEY UPDATE
+            daily_active_users = VALUES(daily_active_users),
+            task_completions = VALUES(task_completions),
+            articles_created = VALUES(articles_created),
+            rewards_paid_out = VALUES(rewards_paid_out),
+            updated_at = NOW();
+    </insert>
+
+</mapper>

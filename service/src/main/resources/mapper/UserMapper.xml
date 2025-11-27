@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaodou.mapper.UserMapper">
+    <!-- 通常放在文件顶部 -->
+    <sql id="excludeAdminUser">
+        AND u.username != 'admin'
+    </sql>
+    <!-- 定义可复用的SQL片段 -->
+    <sql id="userWithRolesColumns">
+        u.id AS user_id,
+        u.username,
+        u.email,
+        u.password,
+        u.status,
+        u.tenant_id,
+        u.last_login_at,
+        u.remark,
+        u.created_at,
+        u.updated_at,
+        r.id AS role_id,
+        r.name AS role_name,
+        r.code AS role_code,
+        r.description AS role_description
+    </sql>
+
+    <sql id="userWithRolesFromJoin">
+        FROM user u
+        LEFT JOIN user_role ur ON u.id = ur.user_id
+        LEFT JOIN role r ON ur.role_id = r.id
+    </sql>
+
+    <!-- 用户与角色联合查询的结果映射 -->
+    <resultMap id="userWithRolesResultMap" type="com.xiaodou.model.dto.user.UserWithRolesDTO">
+        <id property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="email" column="email"/>
+        <result property="password" column="password"/>
+        <result property="status" column="status"/>
+        <result property="tenantId" column="tenant_id"/>
+        <result property="remark" column="remark"/>
+        <result property="lastLoginAt" column="last_login_at"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <collection property="roles" ofType="com.xiaodou.model.Role">
+            <id property="id" column="role_id"/>
+            <result property="name" column="role_name"/>
+            <result property="code" column="role_code"/>
+            <result property="description" column="role_description"/>
+        </collection>
+    </resultMap>
+
+    <!-- 根据用户email查询用户及其角色信息 -->
+    <select id="selectUserWithRolesByUsername" resultMap="userWithRolesResultMap">
+        SELECT
+        <include refid="userWithRolesColumns"/>
+        <include refid="userWithRolesFromJoin"/>
+        WHERE u.username = #{username}
+    </select>
+
+    <!-- 分页查询用户及其角色信息 -->
+    <select id="selectUsersByPage" resultType="com.xiaodou.model.dto.user.UserDTO">
+        SELECT
+        u.id,
+        u.username,
+        u.email,
+        u.password,
+        u.status,
+        u.tenant_id,
+        u.last_login_at,
+        u.remark,
+        u.created_at,
+        u.updated_at,
+        t.name as tenant_name
+        FROM user u
+        LEFT JOIN tenant t ON u.tenant_id = t.id
+        <where>
+            <!-- 引用 SQL 片段 -->
+            <include refid="excludeAdminUser"/>
+
+            <if test="query.username != null and query.username != ''">
+                AND u.username LIKE CONCAT('%', #{query.username}, '%')
+            </if>
+            <if test="query.remark != null and query.remark != ''">
+                AND u.remark LIKE CONCAT('%', #{query.remark}, '%')
+            </if>
+            <if test="query.tenantName != null and query.tenantName != ''">
+                AND t.name LIKE CONCAT('%', #{query.tenantName}, '%')
+            </if>
+            <if test="query.tenantId != null and query.tenantId != ''">
+                AND u.tenant_id = #{query.tenantId}
+            </if>
+            <if test="query.status != null">
+                AND u.status = #{query.status}
+            </if>
+        </where>
+        ORDER BY u.created_at DESC
+    </select>
+</mapper>

@@ -1,0 +1,61 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rocketGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4facfe"/>
+      <stop offset="100%" stop-color="#00f2fe"/>
+    </linearGradient>
+    <linearGradient id="flameGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff9a9e"/>
+      <stop offset="99.94%" stop-color="#fad0c4"/>
+      <stop offset="100%" stop-color="#fad0c4"/>
+    </linearGradient>
+    <linearGradient id="windowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a1c4fd"/>
+      <stop offset="100%" stop-color="#c2e9fb"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- 火箭底部火焰 -->
+  <g class="flames">
+    <path d="M245,371 C245,371 220,410 256,450 C292,410 267,371 267,371 L245,371 Z" fill="url(#flameGrad)">
+      <animate attributeName="d" 
+        values="M245,371 C245,371 220,410 256,450 C292,410 267,371 267,371 L245,371 Z;
+                M245,371 C245,371 230,420 256,460 C282,420 267,371 267,371 L245,371 Z;
+                M245,371 C245,371 220,410 256,450 C292,410 267,371 267,371 L245,371 Z" 
+        dur="1.5s" repeatCount="indefinite" />
+    </path>
+  </g>
+
+  <!-- 火箭主体 -->
+  <g class="rocket">
+    <path d="M256,50 C150,150 150,250 150,350 L200,350 L200,300 L312,300 L312,350 L362,350 C362,250 362,150 256,50 Z" fill="url(#rocketGrad)"/>
+    
+    <!-- 机翼 -->
+    <path d="M150,330 L120,380 L200,380 L200,330 Z" fill="#3589d9"/>
+    <path d="M362,330 L392,380 L312,380 L312,330 Z" fill="#3589d9"/>
+    
+    <!-- 窗口 -->
+    <circle cx="256" cy="200" r="30" fill="url(#windowGrad)"/>
+    
+    <!-- 装饰线 -->
+    <path d="M220,120 L292,120" stroke="#3589d9" stroke-width="8" stroke-linecap="round"/>
+    <path d="M220,140 L292,140" stroke="#3589d9" stroke-width="6" stroke-linecap="round"/>
+    <path d="M230,160 L282,160" stroke="#3589d9" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- 星星装饰 -->
+  <g class="stars">
+    <circle cx="100" cy="100" r="5" fill="white">
+      <animate attributeName="opacity" values="0.2;1;0.2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="400" cy="150" r="7" fill="white">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="150" cy="450" r="4" fill="white">
+      <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="400" cy="400" r="6" fill="white">
+      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="3.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>

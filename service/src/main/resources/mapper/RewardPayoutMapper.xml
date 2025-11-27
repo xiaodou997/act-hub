@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaodou.mapper.RewardPayoutMapper">
+
+    <select id="selectPaidUserIdsByTaskId" resultType="java.lang.String">
+        SELECT user_id FROM reward_payout WHERE task_id = #{taskId}
+    </select>
+
+    <select id="selectPageWithDetails" resultType="com.xiaodou.model.vo.RewardPayoutVO">
+        SELECT
+            rp.*,
+            wu.nickname AS userName,
+            t.task_name AS taskName,
+            r.name AS rewardName,
+            u.user_name AS operatorName
+        FROM
+            reward_payout rp
+        LEFT JOIN
+            wechat_user wu ON rp.user_id = wu.id
+        LEFT JOIN
+            task t ON rp.task_id = t.id
+        LEFT JOIN
+            reward r ON rp.reward_id = r.id
+        LEFT JOIN
+            user u ON rp.operator_id = u.id
+        <where>
+            <if test="query.userId != null and query.userId != ''">
+                AND rp.user_id = #{query.userId}
+            </if>
+            <if test="query.taskId != null and query.taskId != ''">
+                AND rp.task_id = #{query.taskId}
+            </if>
+            <if test="query.rewardId != null and query.rewardId != ''">
+                AND rp.reward_id = #{query.rewardId}
+            </if>
+            <if test="query.status != null">
+                AND rp.status = #{query.status}
+            </if>
+            <if test="query.payoutTimeStart != null">
+                AND rp.payout_time >= FROM_UNIXTIME(#{query.payoutTimeStart} / 1000)
+            </if>
+            <if test="query.payoutTimeEnd != null">
+                AND rp.payout_time &lt;= FROM_UNIXTIME(#{query.payoutTimeEnd} / 1000)
+            </if>
+        </where>
+        ORDER BY
+            rp.payout_time DESC
+    </select>
+
+</mapper>

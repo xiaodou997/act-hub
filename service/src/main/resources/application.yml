@@ -1,0 +1,100 @@
+server:
+  port: 9910
+  servlet:
+    context-path: /act
+
+spring:
+  application:
+    name: acthub-v1
+  profiles:
+    active: dev   # 默认启用 dev 配置，生产环境部署时改成 prod
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 1800s # 使用时间格式化
+      password:
+      lettuce:
+        pool:
+          max-active: 20  # 最大连接数
+          max-wait: -1    # 最大阻塞等待时间(负数表示没限制)
+          max-idle: 5     # 最大空闲
+          min-idle: 0     # 最小空闲
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  datasource:
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+    url: jdbc:mysql://localhost:3306/hgs-acthub?allowPublicKeyRetrieval=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: kpph86HdMUA56
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  rabbitmq:
+    host: localhost             # 如果在 Docker 中运行，可以改为 rabbitmq-container（服务名）
+    port: 5672
+    username: guest
+    password: Rabbitkpph86HdMUA56
+    virtual-host: /                # 默认虚拟主机
+    listener:
+      simple:
+        acknowledge-mode: manual   # 手动ACK（消费者中手动控制确认）
+        concurrency: 1             # 并发消费者数
+        max-concurrency: 5         # 最大并发消费者数
+        prefetch: 1                # 每次只处理一条消息（用于更细致控制）
+    template:
+      mandatory: true              # 启用失败返回机制（可用于发送失败处理）
+    publisher-confirm-type: correlated  # 启用发送确认机制
+    publisher-returns: true
+  task:
+    scheduling:
+      pool:
+        size: 5  # 定时任务线程池大小
+      thread-name-prefix: acthub-task-  # 线程名前缀
+mybatis-plus:
+  global-config:
+    db-config:
+      logic-delete-field: isDeleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+ip2region:
+  path: /Users/luoxiaodou/xiaodou/IDEA/xiaodou-parent/deploy/ip2region.xdb
+
+# application.yml 中设置 P6Spy 日志为 DEBUG 级别
+decorator:
+  datasource:
+    p6spy:
+      log-format: "%(currentTime)|%(executionTime) ms|%(sqlSingleLine)"
+
+# ===================================================================
+# Micrometer Tracing Configuration for Distributed Tracing
+# ===================================================================
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0  # 100% 采样，生产环境可调整为较低值
+
+# ===================================================================
+# JWT Configuration
+# ===================================================================
+jwt:
+  secret: "a-very-long-and-secure-random-string-for-production-use-at-least-32-chars" # 生产环境务必替换为更安全的密钥
+  access-token-expiration: 30  # Access Token 过期时间 (分钟)
+  refresh-token-expiration: 7 # Refresh Token 过期时间 (天)
+
+
+# ===================================================================
+# WeChat Mini Program Configuration
+# ===================================================================
+wechat:
+  miniapp:
+    appid: YOUR_WECHAT_MINIAPP_APPID # 替换为你的小程序 AppID
+    secret: YOUR_WECHAT_MINIAPP_SECRET # 替换为你的小程序 AppSecret
+

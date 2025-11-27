@@ -1,0 +1,27 @@
+{
+  "name": "acthub-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --fix",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
+    "@vueuse/core": "^13.9.0",
+    "axios": "^1.12.2",
+    "dayjs": "^1.11.18",
+    "echarts": "^6.0.0",
+    "element-plus": "^2.11.4",
+    "pinia": "^3.0.3",
+    "pinia-plugin-persistedstate": "^4.5.0",
+    "sass": "^1.93.2",
+    "sortablejs": "^1.15.6",
+    "vue-json-pretty": "^2.5.0",
+    "vue-router": "^4.5.1"
+  }
+}
