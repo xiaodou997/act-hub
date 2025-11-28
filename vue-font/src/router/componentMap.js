@@ -13,6 +13,7 @@ const componentMap = {
   AiAppTypeManagement: () => import('@/views/ai-app-type/AiAppTypeManagement.vue'),
   AiApplicationManagement: () => import('@/views/ai-app/AiApplicationManagement.vue'),
   AiWorkshop: () => import('@/views/ai-workshop/AiWorkshopPage.vue'), // 新增AI工坊页面
+  AiRecordListPage: () => import('@/views/ai-app-record/AiRecordListPage.vue'), // 新增AI应用执行记录列表页面
 
   ComingSoon: () => import('@/views/ComingSoon.vue'),
 
