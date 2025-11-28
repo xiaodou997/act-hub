@@ -12,6 +12,7 @@ const componentMap = {
   MenuManagement: () => import('@/views/menu/MenuManagement.vue'),
   AiAppTypeManagement: () => import('@/views/ai-app-type/AiAppTypeManagement.vue'),
   AiApplicationManagement: () => import('@/views/ai-app/AiApplicationManagement.vue'),
+  AiWorkshop: () => import('@/views/ai-workshop/AiWorkshopPage.vue'), // 新增AI工坊页面
 
   ComingSoon: () => import('@/views/ComingSoon.vue'),
 
