@@ -12,6 +12,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -42,5 +49,40 @@ public class RewardItemController {
     public Result<IPage<RewardItemVO>> pageListRewardItems(@Valid RewardItemQuery query) {
         IPage<RewardItemVO> page = rewardItemService.pageListRewardItems(query);
         return Result.success(page);
+    }
+
+    @Operation(summary = "批量导入CSV", description = "上传CSV文件导入奖品实例，列为userId,phone,itemValue")
+    @PostMapping("/import/csv")
+    public Result<Void> importRewardItemsCsv(@RequestParam("rewardId") String rewardId,
+                                             @RequestParam("file") MultipartFile file) throws Exception {
+        String importerId = UserContextHolder.getUserId();
+        List<RewardItemImportDTO.RewardItemDetail> items = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            String line;
+            boolean first = true;
+            while ((line = reader.readLine()) != null) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty()) continue;
+                String[] parts = trimmed.split(",");
+                if (first && parts.length >= 1 && parts[0].toLowerCase().contains("userid")) {
+                    first = false;
+                    continue;
+                }
+                first = false;
+                String userId = parts.length > 0 ? parts[0].trim() : null;
+                String phone = parts.length > 1 ? parts[1].trim() : null;
+                String itemValue = parts.length > 2 ? parts[2].trim() : null;
+                RewardItemImportDTO.RewardItemDetail d = new RewardItemImportDTO.RewardItemDetail();
+                d.setTargetUserId(userId);
+                d.setTargetPhoneNumber(phone);
+                d.setItemValue(itemValue);
+                items.add(d);
+            }
+        }
+        RewardItemImportDTO dto = new RewardItemImportDTO();
+        dto.setRewardId(rewardId);
+        dto.setItems(items);
+        rewardItemService.importRewardItems(dto, importerId);
+        return Result.success();
     }
 }

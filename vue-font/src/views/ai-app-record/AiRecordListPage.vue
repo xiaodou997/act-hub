@@ -11,7 +11,7 @@
       <el-form :model="searchForm" inline>
         <el-form-item label="应用名称">
           <el-select
-            v-model="searchForm.appId"
+            v-model="searchForm.aiApplicationId"
             placeholder="全部应用"
             clearable
             filterable
@@ -33,22 +33,10 @@
             clearable
             style="width: 140px"
           >
-            <el-option label="执行中" value="RUNNING" />
-            <el-option label="成功" value="SUCCESS" />
-            <el-option label="失败" value="FAILED" />
+            <el-option label="成功" :value="1" />
+            <el-option label="失败" :value="2" />
+            <el-option label="执行中" :value="3" />
           </el-select>
-        </el-form-item>
-
-        <el-form-item label="执行时间">
-          <el-date-picker
-            v-model="searchForm.dateRange"
-            type="daterange"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            value-format="YYYY-MM-DD"
-            style="width: 260px"
-          />
         </el-form-item>
 
         <el-form-item>
@@ -83,11 +71,10 @@
     >
       <el-table-column type="selection" width="50" />
 
-      <el-table-column label="应用名称" prop="appName" min-width="150">
+      <el-table-column label="应用名称" prop="aiApplicationId" min-width="150">
         <template #default="{ row }">
           <div class="app-info">
-            <span class="app-name">{{ row.appName || '未知应用' }}</span>
-            <el-tag v-if="row.typeName" size="small" type="info">{{ row.typeName }}</el-tag>
+            <span class="app-name">{{ getAppName(row.aiApplicationId) }}</span>
           </div>
         </template>
       </el-table-column>
@@ -103,19 +90,21 @@
       <el-table-column label="输入参数" prop="inputParams" min-width="200">
         <template #default="{ row }">
           <el-tooltip
-            :content="formatJson(row.inputParams)"
+            :content="formatJson(row.displayInputParams || row.inputParams)"
             placement="top"
             :disabled="!row.inputParams"
           >
-            <span class="params-preview">{{ getParamsPreview(row.inputParams) }}</span>
+            <span class="params-preview">{{
+              getParamsPreview(row.displayInputParams || row.inputParams)
+            }}</span>
           </el-tooltip>
         </template>
       </el-table-column>
 
-      <el-table-column label="执行耗时" prop="duration" width="100" align="center">
+      <el-table-column label="执行耗时" prop="executionTime" width="100" align="center">
         <template #default="{ row }">
-          <span v-if="row.duration">{{ row.duration }}ms</span>
-          <span v-else-if="row.status === 'RUNNING'" class="running-text">执行中...</span>
+          <span v-if="row.executionTime">{{ row.executionTime }}ms</span>
+          <span v-else-if="row.status === 3" class="running-text">执行中...</span>
           <span v-else>-</span>
         </template>
       </el-table-column>
@@ -137,7 +126,7 @@
     <!-- 分页 -->
     <div class="pagination-container">
       <el-pagination
-        v-model:current-page="pagination.page"
+        v-model:current-page="pagination.pageNum"
         v-model:page-size="pagination.pageSize"
         :page-sizes="[10, 20, 50, 100]"
         :total="pagination.total"
@@ -156,11 +145,7 @@
           </el-descriptions-item>
 
           <el-descriptions-item label="应用名称">
-            {{ currentRecord.appName || '未知应用' }}
-          </el-descriptions-item>
-
-          <el-descriptions-item label="应用分类">
-            {{ currentRecord.typeName || '-' }}
+            {{ getAppName(currentRecord.aiApplicationId) }}
           </el-descriptions-item>
 
           <el-descriptions-item label="执行状态">
@@ -170,10 +155,10 @@
           </el-descriptions-item>
 
           <el-descriptions-item label="执行耗时">
-            {{ currentRecord.duration ? currentRecord.duration + 'ms' : '-' }}
+            {{ currentRecord.executionTime ? currentRecord.executionTime + 'ms' : '-' }}
           </el-descriptions-item>
 
-          <el-descriptions-item label="执行时间" :span="2">
+          <el-descriptions-item label="执行时间">
             {{ formatDateTime(currentRecord.createdAt) }}
           </el-descriptions-item>
         </el-descriptions>
@@ -183,7 +168,7 @@
           <h4>输入参数</h4>
           <el-input
             type="textarea"
-            :model-value="formatJson(currentRecord.inputParams)"
+            :model-value="formatJson(currentRecord.displayInputParams || currentRecord.inputParams)"
             :rows="6"
             readonly
           />
@@ -241,14 +226,13 @@ const loading = ref(false)
 
 // 搜索表单
 const searchForm = reactive({
-  appId: '',
-  status: '',
-  dateRange: [],
+  aiApplicationId: '',
+  status: null,
 })
 
 // 分页
 const pagination = reactive({
-  page: 1,
+  pageNum: 1,
   pageSize: 10,
   total: 0,
 })
@@ -256,29 +240,35 @@ const pagination = reactive({
 // 数据列表
 const recordList = ref([])
 const applicationList = ref([])
+const applicationMap = ref(new Map())
 const selectedIds = ref([])
 
 // 详情弹窗
 const detailVisible = ref(false)
 const currentRecord = ref(null)
 
-// 状态映射
+// 状态映射 - 与后端保持一致：1-成功,2-失败,3-进行中
 const getStatusType = (status) => {
   const map = {
-    RUNNING: 'warning',
-    SUCCESS: 'success',
-    FAILED: 'danger',
+    1: 'success', // 成功
+    2: 'danger', // 失败
+    3: 'warning', // 进行中
   }
   return map[status] || 'info'
 }
 
 const getStatusText = (status) => {
   const map = {
-    RUNNING: '执行中',
-    SUCCESS: '成功',
-    FAILED: '失败',
+    1: '成功',
+    2: '失败',
+    3: '执行中',
   }
-  return map[status] || status
+  return map[status] || '未知'
+}
+
+// 获取应用名称
+const getAppName = (appId) => {
+  return applicationMap.value.get(appId) || appId || '未知应用'
 }
 
 // 格式化JSON
@@ -310,7 +300,7 @@ const formatDateTime = (dateStr) => {
   return dayjs(dateStr).format('YYYY-MM-DD HH:mm:ss')
 }
 
-// 加载应用列表（用于筛选下拉）
+// 加载应用列表（用于筛选下拉和名称显示）
 const loadApplications = async () => {
   try {
     const data = await aiWorkshopApi.getCategories()
@@ -320,6 +310,13 @@ const loadApplications = async () => {
       allApps.push(...(apps || []))
     }
     applicationList.value = allApps
+
+    // 构建ID到名称的映射
+    const map = new Map()
+    allApps.forEach((app) => {
+      map.set(app.id, app.name)
+    })
+    applicationMap.value = map
   } catch (error) {
     console.error('加载应用列表失败:', error)
   }
@@ -330,19 +327,15 @@ const loadRecords = async () => {
   loading.value = true
   try {
     const params = {
-      page: pagination.page,
+      pageNum: pagination.pageNum,
       pageSize: pagination.pageSize,
     }
 
-    if (searchForm.appId) {
-      params.appId = searchForm.appId
+    if (searchForm.aiApplicationId) {
+      params.aiApplicationId = searchForm.aiApplicationId
     }
-    if (searchForm.status) {
+    if (searchForm.status !== null && searchForm.status !== '') {
       params.status = searchForm.status
-    }
-    if (searchForm.dateRange && searchForm.dateRange.length === 2) {
-      params.startTime = searchForm.dateRange[0]
-      params.endTime = searchForm.dateRange[1]
     }
 
     const data = await aiAppRecordApi.page(params)
@@ -358,28 +351,27 @@ const loadRecords = async () => {
 
 // 搜索
 const handleSearch = () => {
-  pagination.page = 1
+  pagination.pageNum = 1
   loadRecords()
 }
 
 // 重置
 const handleReset = () => {
-  searchForm.appId = ''
-  searchForm.status = ''
-  searchForm.dateRange = []
-  pagination.page = 1
+  searchForm.aiApplicationId = ''
+  searchForm.status = null
+  pagination.pageNum = 1
   loadRecords()
 }
 
 // 分页变化
 const handleSizeChange = (size) => {
   pagination.pageSize = size
-  pagination.page = 1
+  pagination.pageNum = 1
   loadRecords()
 }
 
 const handlePageChange = (page) => {
-  pagination.page = page
+  pagination.pageNum = page
   loadRecords()
 }
 

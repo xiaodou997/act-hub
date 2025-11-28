@@ -1,0 +1,41 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+springdoc:
+  swagger-ui:
+    enabled: true
+  api-docs:
+    enabled: true
+  info:
+    title: AI 服务接口文档
+    description: |
+      AI 微服务 RESTful API 文档
+
+      提供以下主要功能：
+      - 自然语言处理
+      - 机器学习模型调用
+      - 数据分析服务
+    version: 1.0.0
+
+logging:
+  level:
+    root: info
+    site.plugin: DEBUG  # 你自己项目包名改一下，调试更详细
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0  # 开发环境 100% 采样以便调试
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans  # 如果使用 Zipkin，可以取消注释并配置
+  otel:
+    export:
+      zipkin:
+        enabled: false  # 如果不需要 Zipkin，保持禁用
+      otlp:
+        enabled: false  # 如果不需要 OTLP，保持禁用
+      console:
+        enabled: true   # 启用控制台输出追踪信息以便调试

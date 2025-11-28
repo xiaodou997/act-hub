@@ -14,6 +14,15 @@ const componentMap = {
   AiApplicationManagement: () => import('@/views/ai-app/AiApplicationManagement.vue'),
   AiWorkshop: () => import('@/views/ai-workshop/AiWorkshopPage.vue'), // 新增AI工坊页面
   AiRecordListPage: () => import('@/views/ai-app-record/AiRecordListPage.vue'), // 新增AI应用执行记录列表页面
+  RewardManagement: () => import('@/views/reward/RewardManagement.vue'),
+  RewardItemManagement: () => import('@/views/reward/RewardItemManagement.vue'),
+  RewardPayoutCenter: () => import('@/views/reward/RewardPayoutCenter.vue'),
+  ArticleManagement: () => import('@/views/academy/ArticleManagement.vue'),
+  ArticleCategoryManagement: () => import('@/views/academy/ArticleCategoryManagement.vue'),
+  BlacklistManagement: () => import('@/views/blacklist/BlacklistManagement.vue'),
+  AddressManagement: () => import('@/views/address/AddressManagement.vue'),
+  NotificationCenter: () => import('@/views/notification/NotificationCenter.vue'),
+  TrackingEventManagement: () => import('@/views/tracking/TrackingEventManagement.vue'),
 
   ComingSoon: () => import('@/views/ComingSoon.vue'),
 

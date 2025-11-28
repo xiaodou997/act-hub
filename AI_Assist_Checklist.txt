@@ -1,0 +1,126 @@
+AI 辅助分析清单（外部使用，避免随仓库上传）
+
+使用建议：
+- 仅在需要 AI 辅助时，将本清单中的“文件名列表”与关键片段一并提供。
+- 传递文件时优先提供文件名与必要片段，避免整库上传，节约上下文 token。
+- 如涉及鉴权或权限，请附带认证与权限相关通用文件名集合。
+
+文档：
+- PROJECT_DOCUMENTATION_INDEX.md
+- RBAC_MANAGEMENT_DESIGN.md
+- AI_APP_TYPE_DESIGN.md
+- AI_APPLICATION_DESIGN.md
+- AI_APP_RECORD_DESIGN.md
+- AI_WORKSHOP_DESIGN.md
+- TASK_MANAGEMENT_DESIGN.md
+
+后端通用：
+- ActHubServiceApplication.java
+- SecurityConfig.java
+- JwtAuthenticationFilter.java
+- UserContextHolder.java
+- OpenApiConfig.java
+- MybatisPlusConfig.java
+- application.yml
+
+AI 应用与工坊（后端）：
+- AiApplicationController.java
+- AiWorkshopController.java
+- AiApplicationService.java
+- AiApplicationServiceImpl.java
+- AiAppExecutor.java
+- AiApplicationHandlerFactory.java
+- SyncWorkflowHandler.java
+- HttpAiApplicationHandler.java
+- WorkflowAiApplicationHandler.java
+- TikHubHandler.java
+- JsonSchemaUtils.java
+- AiApplication.java
+- AiAppType.java
+- AiAppRecord.java
+
+执行记录（后端）：
+- AiAppRecordController.java
+- AiAppRecordService.java
+- AiAppRecordServiceImpl.java
+- AiAppRecordMapper.java
+- AiAppRecordVO.java
+
+任务管理（后端）：
+- TaskController.java
+- TaskParticipationController.java
+- RewardController.java
+- TaskTargetUserController.java
+- TaskService.java
+- TaskParticipationService.java
+- TaskTargetUserService.java
+- RewardService.java
+- Task.java
+- TaskParticipation.java
+- TaskTargetUser.java
+- Reward.java
+- TaskMapper.java
+- TaskParticipationMapper.java
+- TaskTargetUserMapper.java
+- RewardMapper.java
+
+RBAC（后端）：
+- UserController.java
+- RoleController.java
+- PermissionController.java
+- MenuController.java
+- UserService.java
+- RoleService.java
+- PermissionService.java
+- MenuService.java
+- User.java
+- Role.java
+- Permission.java
+- Menu.java
+
+前端通用：
+- main.js
+- App.vue
+- request.js
+- router/index.js
+- router/componentMap.js
+- stores/user.js
+- stores/menu.js
+- directives/v-permission.js
+- package.json
+- vite.config.js
+- .env
+
+前端页面与组件：
+- AiApplicationManagement.vue
+- AiApplicationForm.vue
+- AiWorkshopPage.vue
+- DynamicParamForm.vue
+- AiRecordListPage.vue
+- TaskManagement.vue
+- TaskForm.vue
+- TaskDetail.vue
+- TaskParticipations.vue
+- UserManagement.vue
+- RoleManagement.vue
+- PermissionManagement.vue
+- MenuManagement.vue
+
+前端 API 模块：
+- aiApplication.js
+- aiWorkshop.js
+- aiAppRecord.js
+- task.js
+- user.js
+- role.js
+- permission.js
+- menu.js
+
+最小上下文包模板：
+- 执行失败排查：
+  AiApplicationController.java、AiAppExecutor.java、SyncWorkflowHandler.java、AiAppRecordServiceImpl.java、AiAppRecordController.java、aiApplication.js、AiRecordListPage.vue
+- 奖励发放异常：
+  RewardController.java、RewardService.java、TaskParticipationController.java、TaskParticipationService.java、TaskParticipations.vue、task.js
+
+传递规则：
+- 文件名 + 必要代码片段 + 配置项；避免整库、避免无关模块。

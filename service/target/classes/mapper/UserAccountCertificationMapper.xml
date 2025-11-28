@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaodou.mapper.UserAccountCertificationMapper">
+
+    <sql id="selectJoins">
+        FROM
+            user_account_certification uac
+        LEFT JOIN
+            wechat_user wu ON uac.user_id = wu.id
+        LEFT JOIN
+            user u ON uac.auditor_id = u.id
+    </sql>
+
+    <select id="selectPageWithDetails" resultType="com.xiaodou.model.vo.CertificationVO">
+        SELECT
+            uac.*,
+            wu.nickname AS userName,
+            u.user_name AS auditorName
+        <include refid="selectJoins"/>
+        <where>
+            <if test="query.userId != null and query.userId != ''">
+                AND uac.user_id = #{query.userId}
+            </if>
+            <if test="query.platform != null and query.platform != ''">
+                AND uac.platform = #{query.platform}
+            </if>
+            <if test="query.status != null">
+                AND uac.status = #{query.status}
+            </if>
+            <if test="query.accountKeyword != null and query.accountKeyword != ''">
+                AND (uac.account_id LIKE CONCAT('%', #{query.accountKeyword}, '%') OR uac.account_name LIKE CONCAT('%', #{query.accountKeyword}, '%'))
+            </if>
+        </where>
+        ORDER BY
+            uac.created_at DESC
+    </select>
+
+    <select id="selectDetailById" resultType="com.xiaodou.model.vo.CertificationVO">
+        SELECT
+            uac.*,
+            wu.nickname AS userName,
+            u.user_name AS auditorName
+        <include refid="selectJoins"/>
+        WHERE uac.id = #{id}
+    </select>
+
+</mapper>

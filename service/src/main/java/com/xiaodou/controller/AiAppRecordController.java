@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * AI应用执行记录 前端控制器
  *
@@ -70,6 +72,33 @@ public class AiAppRecordController {
 
         Page<AiAppRecord> page = new Page<>(pageNum, pageSize);
         IPage<AiAppRecord> result = aiAppRecordService.pageByUser(page, queryUserId, aiApplicationId, status);
+
+        // 转换为 VO
+        IPage<AiAppRecordVO> voPage = result.convert(AiAppRecordVO::fromEntity);
+        return Result.success(voPage);
+    }
+
+    /**
+     * 查询当前用户的AI应用记录（简化版）
+     * <p>
+     * 用于AI工坊等场景，只返回当前用户自己的记录
+     * </p>
+     */
+    @GetMapping("/my")
+    @SystemLog(module = "AI应用记录管理", action = "查询我的AI应用记录")
+    @Operation(summary = "查询我的AI应用记录", description = "获取当前登录用户的AI应用执行记录")
+    public Result<IPage<AiAppRecordVO>> myRecords(
+        @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer pageNum,
+        @Parameter(description = "每页条数") @RequestParam(defaultValue = "20") Integer pageSize,
+        @Parameter(description = "AI应用ID") @RequestParam(required = false) String aiApplicationId,
+        @Parameter(description = "状态（1-成功,2-失败,3-进行中）") @RequestParam(required = false) Integer status) {
+
+        String currentUserId = UserContextHolder.getUserId();
+        log.info("查询我的AI应用记录 - pageNum: {}, pageSize: {}, userId: {}, aiApplicationId: {}, status: {}",
+            pageNum, pageSize, currentUserId, aiApplicationId, status);
+
+        Page<AiAppRecord> page = new Page<>(pageNum, pageSize);
+        IPage<AiAppRecord> result = aiAppRecordService.pageByUser(page, currentUserId, aiApplicationId, status);
 
         // 转换为 VO
         IPage<AiAppRecordVO> voPage = result.convert(AiAppRecordVO::fromEntity);
@@ -168,6 +197,42 @@ public class AiAppRecordController {
         }
 
         aiAppRecordService.removeById(id);
+        return Result.success();
+    }
+
+    /**
+     * 批量删除AI应用记录（软删除）
+     * <p>
+     * 权限控制：
+     * - 超级管理员可以删除任何AI应用记录
+     * - 普通用户只能删除自己的AI应用记录
+     * </p>
+     */
+    @DeleteMapping("/batch")
+    @SystemLog(module = "AI应用记录管理", action = "批量删除AI应用记录", recordResponse = true)
+    @Operation(summary = "批量删除AI应用记录", description = "批量软删除AI应用执行记录")
+    public Result<Void> batchDelete(@RequestBody List<String> ids) {
+        log.info("批量删除AI应用记录 - ids: {}", ids);
+
+        if (ids == null || ids.isEmpty()) {
+            throw new AppException(ResultCodeEnum.BAD_REQUEST, "请选择要删除的记录");
+        }
+
+        String currentUserId = UserContextHolder.getUserId();
+        boolean isSuperAdmin = UserContextHolder.isSuperAdmin();
+
+        // 非超管需要校验每条记录的所有权
+        if (!isSuperAdmin) {
+            for (String id : ids) {
+                AiAppRecord record = aiAppRecordService.getById(id);
+                if (record != null && !currentUserId.equals(record.getUserId())) {
+                    log.warn("用户尝试删除其他用户的AI应用记录 - currentUserId: {}, recordId: {}", currentUserId, id);
+                    throw new AppException(ResultCodeEnum.FORBIDDEN, "无权删除部分记录");
+                }
+            }
+        }
+
+        aiAppRecordService.removeByIds(ids);
         return Result.success();
     }
 }

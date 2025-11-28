@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xiaodou.mapper.ArticleMapper">
+
+    <resultMap id="ArticleVOMap" type="com.xiaodou.model.vo.ArticleVO">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="summary" column="summary"/>
+        <result property="coverImageUrl" column="cover_image_url"/>
+        <result property="type" column="type"/>
+        <result property="content" column="content"/>
+        <result property="mediaUrls" column="media_urls"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="status" column="status"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="creatorName" column="creatorName"/>
+        <result property="publishedAt" column="published_at"/>
+        <result property="createdAt" column="created_at"/>
+        <collection property="categories" ofType="com.xiaodou.model.vo.ArticleCategoryVO">
+            <id property="id" column="category_id"/>
+            <result property="name" column="category_name"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectPageWithDetails" resultType="com.xiaodou.model.vo.ArticleVO">
+        SELECT
+            a.*,
+            u.user_name AS creatorName
+        FROM
+            article a
+        LEFT JOIN
+            user u ON a.creator_id = u.id
+        <if test="query.categoryId != null and query.categoryId != ''">
+            INNER JOIN article_category_map acm ON a.id = acm.article_id AND acm.category_id = #{query.categoryId}
+        </if>
+        <where>
+            <if test="query.title != null and query.title != ''">
+                AND a.title LIKE CONCAT('%', #{query.title}, '%')
+            </if>
+            <if test="query.type != null">
+                AND a.type = #{query.type}
+            </if>
+            <if test="query.status != null">
+                AND a.status = #{query.status}
+            </if>
+        </where>
+        ORDER BY
+            a.sort_order DESC, a.created_at DESC
+    </select>
+
+    <select id="selectDetailById" resultMap="ArticleVOMap">
+        SELECT
+            a.*,
+            u.user_name AS creatorName,
+            ac.id AS category_id,
+            ac.name AS category_name
+        FROM
+            article a
+        LEFT JOIN
+            user u ON a.creator_id = u.id
+        LEFT JOIN
+            article_category_map acm ON a.id = acm.article_id
+        LEFT JOIN
+            article_category ac ON acm.category_id = ac.id
+        WHERE
+            a.id = #{id}
+    </select>
+
+</mapper>

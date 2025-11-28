@@ -6,21 +6,48 @@ import request from '@/api/request'
  */
 export const aiAppRecordApi = {
   /**
-   * 分页查询执行记录
+   * 分页查询执行记录（管理端）
    * @param {Object} params - 查询参数
-   * @param {number} params.page - 页码
-   * @param {number} params.pageSize - 每页条数
-   * @param {string} params.appId - 应用ID（可选）
-   * @param {string} params.status - 执行状态（可选）
-   * @param {string} params.startTime - 开始时间（可选）
-   * @param {string} params.endTime - 结束时间（可选）
+   * @param {number} params.pageNum - 页码（默认1）
+   * @param {number} params.pageSize - 每页条数（默认20）
+   * @param {string} params.aiApplicationId - 应用ID（可选）
+   * @param {number} params.status - 执行状态 1-成功,2-失败,3-进行中（可选）
+   * @param {string} params.userId - 用户ID，超管可用（可选）
    * @returns {Promise} 分页结果
    */
   page(params) {
     return request({
       url: '/ai-app-record/page',
       method: 'get',
-      params,
+      params: {
+        pageNum: params.pageNum || params.page || 1,
+        pageSize: params.pageSize || 20,
+        aiApplicationId: params.aiApplicationId || params.appId,
+        status: params.status,
+        userId: params.userId,
+      },
+    })
+  },
+
+  /**
+   * 查询当前用户的执行记录（AI工坊使用）
+   * @param {Object} params - 查询参数
+   * @param {number} params.pageNum - 页码（默认1）
+   * @param {number} params.pageSize - 每页条数（默认20）
+   * @param {string} params.aiApplicationId - 应用ID（可选）
+   * @param {number} params.status - 执行状态（可选）
+   * @returns {Promise} 分页结果
+   */
+  myRecords(params = {}) {
+    return request({
+      url: '/ai-app-record/my',
+      method: 'get',
+      params: {
+        pageNum: params.pageNum || params.page || 1,
+        pageSize: params.pageSize || 20,
+        aiApplicationId: params.aiApplicationId || params.appId,
+        status: params.status,
+      },
     })
   },
 
@@ -32,6 +59,18 @@ export const aiAppRecordApi = {
   getById(id) {
     return request({
       url: `/ai-app-record/${id}`,
+      method: 'get',
+    })
+  },
+
+  /**
+   * 根据执行ID查询记录（用于异步任务）
+   * @param {string} executeId - 执行ID
+   * @returns {Promise} 记录详情
+   */
+  getByExecuteId(executeId) {
+    return request({
+      url: `/ai-app-record/execute/${executeId}`,
       method: 'get',
     })
   },
@@ -58,19 +97,6 @@ export const aiAppRecordApi = {
       url: '/ai-app-record/batch',
       method: 'delete',
       data: ids,
-    })
-  },
-
-  /**
-   * 获取用户的执行记录列表（简化版，用于AI工坊）
-   * @param {Object} params - 查询参数
-   * @returns {Promise}
-   */
-  myRecords(params) {
-    return request({
-      url: '/ai-app-record/my',
-      method: 'get',
-      params,
     })
   },
 }

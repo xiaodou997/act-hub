@@ -132,4 +132,35 @@ public class RewardPayoutServiceImpl extends ServiceImpl<RewardPayoutMapper, Rew
         IPage<RewardPayoutVO> pageResult = rewardPayoutMapper.selectPageWithDetails(page, query);
         return pageResult;
     }
+
+    @Override
+    public RewardPayoutVO getPayoutDetail(String id) {
+        // 简化：直接根据ID查询并封装为VO，实际项目可在Mapper中做关联查询
+        RewardPayout r = this.getById(id);
+        if (r == null) return null;
+        RewardPayoutVO vo = new RewardPayoutVO();
+        vo.setId(r.getId());
+        vo.setTaskId(r.getTaskId());
+        vo.setUserId(r.getUserId());
+        vo.setRewardId(r.getRewardId());
+        vo.setRewardName(null);
+        vo.setImageUrl(null);
+        vo.setIssuedAt(DateTimeUtils.toTimestampAtUTC8(r.getPayoutTime()));
+        vo.setStatus(r.getStatus());
+        vo.setRewardForm(r.getRewardType());
+        vo.setPayoutContent(r.getPayoutContent());
+        return vo;
+    }
+
+    @Override
+    public boolean redeem(String recordId, String userId, String addressId) {
+        RewardPayout r = this.getById(recordId);
+        if (r == null || !userId.equals(r.getUserId())) return false;
+        // 券码：直接返回 payoutContent；实物：记录地址ID或快递准备状态（此处仅做状态保留）
+        RewardPayout u = new RewardPayout();
+        u.setId(recordId);
+        // 不改变已发放的状态，若需要补充可设置为“已确认兑换”
+        this.updateById(u);
+        return true;
+    }
 }

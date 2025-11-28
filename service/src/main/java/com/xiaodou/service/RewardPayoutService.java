@@ -31,4 +31,14 @@ public interface RewardPayoutService extends IService<RewardPayout> {
      * @return 发放记录VO分页列表
      */
     IPage<RewardPayoutVO> pageListPayouts(RewardPayoutQuery query);
+
+    /**
+     * 获取单个发放记录详情
+     */
+    RewardPayoutVO getPayoutDetail(String id);
+
+    /**
+     * 兑换/填写地址
+     */
+    boolean redeem(String recordId, String userId, String addressId);
 }

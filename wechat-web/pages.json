@@ -1,0 +1,48 @@
+{
+  "pages": [
+    { "path": "pages/index", "style": { "navigationBarTitleText": "ActHub" } },
+    { "path": "pages/login", "style": { "navigationBarTitleText": "登录" } },
+    {
+      "path": "pages/task-detail",
+      "style": { "navigationBarTitleText": "任务详情" }
+    },
+    {
+      "path": "pages/submit-task",
+      "style": { "navigationBarTitleText": "提交任务" }
+    },
+    {
+      "path": "pages/my-tasks",
+      "style": { "navigationBarTitleText": "我的任务" }
+    },
+    {
+      "path": "pages/rewards",
+      "style": { "navigationBarTitleText": "我的奖励" }
+    },
+    {
+      "path": "pages/reward-detail",
+      "style": { "navigationBarTitleText": "奖品详情" }
+    },
+    {
+      "path": "pages/address",
+      "style": { "navigationBarTitleText": "收货地址" }
+    },
+    {
+      "path": "pages/academy",
+      "style": { "navigationBarTitleText": "创作学院" }
+    },
+    {
+      "path": "pages/copy-assistant",
+      "style": { "navigationBarTitleText": "创作助手" }
+    }
+  ],
+  "tabBar": {
+    "color": "#666",
+    "selectedColor": "#1a85f2",
+    "list": [
+      { "pagePath": "pages/index", "text": "任务中心" },
+      { "pagePath": "pages/my-tasks", "text": "我的任务" },
+      { "pagePath": "pages/rewards", "text": "奖励" },
+      { "pagePath": "pages/academy", "text": "学院" }
+    ]
+  }
+}

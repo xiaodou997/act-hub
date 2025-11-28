@@ -1,0 +1,13 @@
+{
+  "name": "ActHub Mini",
+  "appid": "",
+  "mp-weixin": {
+    "appid": "",
+    "setting": {
+      "urlCheck": false
+    }
+  },
+  "networkTimeout": { "request": 30000 },
+  "darkmode": false
+}
+
